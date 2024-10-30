@@ -1,0 +1,85 @@
+Sub CriarNovaAbaEImportarDados()
+    Dim wbAtual As Workbook
+    Dim wbOrigem As Workbook
+    Dim wsNova As Worksheet
+    Dim wsOrigem As Worksheet
+    Dim caminhoArquivo As String
+    Dim fileDialog As FileDialog
+    Dim i As Long
+    Dim j As Long
+    Dim ultimaLinha As Long
+    Dim abaAtual As Worksheet
+    Dim nomeAbasDireita As Collection
+    Dim valorBusca As Variant
+    Dim abaEncontrada As Boolean
+
+    ' Define o workbook atual
+    Set wbAtual = ThisWorkbook
+
+    ' Cria uma nova aba e renomeia
+    Set wsNova = wbAtual.Worksheets.Add
+    wsNova.Name = "Histórico de OS Maximo"
+
+    ' Move a nova aba para a primeira posição
+    wsNova.Move Before:=wbAtual.Worksheets(1)
+
+    ' Abre a caixa de diálogo para selecionar o arquivo
+    Set fileDialog = Application.FileDialog(msoFileDialogFilePicker)
+    fileDialog.Title = "Selecione o arquivo Excel"
+    fileDialog.Filters.Clear
+    fileDialog.Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm"
+
+    If fileDialog.Show = -1 Then
+        caminhoArquivo = fileDialog.SelectedItems(1)
+        
+        ' Abre o arquivo selecionado
+        Set wbOrigem = Workbooks.Open(caminhoArquivo)
+        ' Assume que os dados estão na primeira aba do arquivo de origem
+        Set wsOrigem = wbOrigem.Worksheets(1)
+
+        ' Copia todos os dados da planilha de origem para a nova aba
+        wsOrigem.UsedRange.Copy Destination:=wsNova.Range("A1")
+
+        ' Adiciona uma nova coluna na posição B
+        wsNova.Columns("B").Insert Shift:=xlToRight
+        wsNova.Cells(1, 2).Value = "Supervisão" ' Renomeia a nova coluna
+
+        ' Fecha o arquivo de origem
+        wbOrigem.Close SaveChanges:=False
+
+        MsgBox "Dados copiados com sucesso para a nova aba!", vbInformation
+    Else
+        MsgBox "Nenhum arquivo foi selecionado.", vbExclamation
+    End If
+
+    ' Identifica as abas à direita da aba "Histórico de OS Maximo"
+    Set nomeAbasDireita = New Collection
+    For i = wsNova.Index + 1 To wbAtual.Worksheets.Count
+        nomeAbasDireita.Add wbAtual.Worksheets(i).Name
+    Next i
+
+    ' Busca os valores na coluna F da aba "Histórico de OS Maximo"
+    ultimaLinha = wsNova.Cells(wsNova.Rows.Count, "F").End(xlUp).Row
+    For j = 2 To ultimaLinha ' Começa da linha 2, assumindo que a linha 1 é o cabeçalho
+        valorBusca = wsNova.Cells(j, 6).Value ' Coluna F
+
+        ' Inicializa a variável para saber se o valor foi encontrado
+        abaEncontrada = False
+
+        ' Busca o valor nas abas à direita
+        For Each abaAtual In wbAtual.Worksheets
+            If Not IsError(Application.Match(valorBusca, abaAtual.Columns("F"), 0)) And _
+               abaAtual.Name <> wsNova.Name Then
+                wsNova.Cells(j, 2).Value = abaAtual.Name ' Escreve o nome da aba na coluna B
+                abaEncontrada = True
+                Exit For ' Sai do loop se encontrar
+            End If
+        Next abaAtual
+
+        If Not abaEncontrada Then
+            wsNova.Cells(j, 2).Value = "Não encontrado" ' Opcional: se não encontrar
+        End If
+    Next j
+
+    MsgBox "Busca concluída!", vbInformation
+End Sub
