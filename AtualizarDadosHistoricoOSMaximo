@@ -1,0 +1,89 @@
+Sub AtualizarDadosHistoricoOSMaximo()
+    Dim wbAtual As Workbook
+    Dim wbOrigem As Workbook
+    Dim wsHistorico As Worksheet
+    Dim wsOrigem As Worksheet
+    Dim caminhoArquivo As String
+    Dim fileDialog As FileDialog
+    Dim ultimaLinhaHistorico As Long
+    Dim ultimaLinhaOrigem As Long
+    Dim i As Long
+    Dim j As Long
+    Dim valorBusca As Variant
+    Dim abaEncontrada As Boolean
+    Dim abaAtual As Worksheet
+
+    ' Define o workbook atual
+    Set wbAtual = ThisWorkbook
+
+    ' Verifica se a aba "Histórico de OS Maximo" já existe
+    On Error Resume Next
+    Set wsHistorico = wbAtual.Worksheets("Histórico de OS Maximo")
+    On Error GoTo 0
+
+    ' Caso a aba não exista, exibe uma mensagem e sai da sub
+    If wsHistorico Is Nothing Then
+        MsgBox "A aba 'Histórico de OS Maximo' não existe. Por favor, crie a aba antes de atualizar.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Abre a caixa de diálogo para selecionar o arquivo de origem
+    Set fileDialog = Application.FileDialog(msoFileDialogFilePicker)
+    fileDialog.Title = "Selecione o arquivo Excel para atualização"
+    fileDialog.Filters.Clear
+    fileDialog.Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm"
+
+    If fileDialog.Show = -1 Then
+        caminhoArquivo = fileDialog.SelectedItems(1)
+        
+        ' Abre o arquivo selecionado
+        Set wbOrigem = Workbooks.Open(caminhoArquivo)
+        Set wsOrigem = wbOrigem.Worksheets(1) ' Assume que os dados estão na primeira aba do arquivo de origem
+
+        ' Encontra a última linha de dados na aba de histórico
+        ultimaLinhaHistorico = wsHistorico.Cells(wsHistorico.Rows.Count, "A").End(xlUp).Row
+        ultimaLinhaOrigem = wsOrigem.Cells(wsOrigem.Rows.Count, "A").End(xlUp).Row
+
+        ' Copia apenas dados novos da aba de origem para a aba de histórico
+        For i = 2 To ultimaLinhaOrigem ' Começa na linha 2 para pular o cabeçalho
+            valorBusca = wsOrigem.Cells(i, 1).Value ' Supondo que a coluna A tenha uma chave única
+
+            ' Verifica se o valor já existe na coluna A da aba de histórico
+            If IsError(Application.Match(valorBusca, wsHistorico.Range("A2:A" & ultimaLinhaHistorico), 0)) Then
+                ' Copia a linha para a próxima linha disponível na aba de histórico
+                ultimaLinhaHistorico = ultimaLinhaHistorico + 1
+                wsHistorico.Rows(ultimaLinhaHistorico).Value = wsOrigem.Rows(i).Value
+            End If
+        Next i
+
+        ' Fecha o arquivo de origem
+        wbOrigem.Close SaveChanges:=False
+
+        ' Atualiza a coluna "Supervisão" na aba "Histórico de OS Maximo"
+        ultimaLinhaHistorico = wsHistorico.Cells(wsHistorico.Rows.Count, "F").End(xlUp).Row
+        For j = 2 To ultimaLinhaHistorico
+            valorBusca = wsHistorico.Cells(j, 6).Value ' Coluna F
+
+            ' Inicializa a variável para saber se o valor foi encontrado
+            abaEncontrada = False
+
+            ' Verifica nas outras abas
+            For Each abaAtual In wbAtual.Worksheets
+                If Not IsError(Application.Match(valorBusca, abaAtual.Columns("F"), 0)) And _
+                   abaAtual.Name <> wsHistorico.Name Then
+                    wsHistorico.Cells(j, 2).Value = abaAtual.Name ' Escreve o nome da aba na coluna B
+                    abaEncontrada = True
+                    Exit For
+                End If
+            Next abaAtual
+
+            If Not abaEncontrada Then
+                wsHistorico.Cells(j, 2).Value = "Não encontrado"
+            End If
+        Next j
+
+        MsgBox "Dados atualizados com sucesso!", vbInformation
+    Else
+        MsgBox "Nenhum arquivo foi selecionado.", vbExclamation
+    End If
+End Sub
