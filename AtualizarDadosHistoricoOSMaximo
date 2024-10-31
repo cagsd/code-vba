@@ -50,9 +50,11 @@ Sub AtualizarDadosHistoricoOSMaximo()
 
             ' Verifica se o valor já existe na coluna A da aba de histórico
             If IsError(Application.Match(valorBusca, wsHistorico.Range("A2:A" & ultimaLinhaHistorico), 0)) Then
-                ' Copia a linha para a próxima linha disponível na aba de histórico
+                ' Incrementa a última linha e copia a linha ignorando a coluna B
                 ultimaLinhaHistorico = ultimaLinhaHistorico + 1
-                wsHistorico.Rows(ultimaLinhaHistorico).Value = wsOrigem.Rows(i).Value
+                wsHistorico.Cells(ultimaLinhaHistorico, "A").Value = wsOrigem.Cells(i, "A").Value
+                wsHistorico.Cells(ultimaLinhaHistorico, "C").Resize(, wsOrigem.Columns.Count - 2).Value = _
+                    wsOrigem.Cells(i, "B").Resize(, wsOrigem.Columns.Count - 1).Value
             End If
         Next i
 
