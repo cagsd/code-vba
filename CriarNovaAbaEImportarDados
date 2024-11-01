@@ -99,6 +99,16 @@ Sub CriarNovaAbaEImportarDados()
 
 ' Definir largura das colunas
     wsNova.Columns.ColumnWidth = 10.0
+' Centraliza e alinha o conteúdo da tabela ao meio
+    With wsNova.UsedRange
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+
+    ' Ativa a quebra de texto automaticamente nos cabeçalhos
+    With wsNova.Rows(1)
+        .WrapText = True
+    End With
 
     MsgBox "Busca concluída e tabela formatada!", vbInformation
 End Sub
