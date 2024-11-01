@@ -12,6 +12,7 @@ Sub CriarNovaAbaEImportarDados()
     Dim nomeAbasDireita As Collection
     Dim valorBusca As Variant
     Dim abaEncontrada As Boolean
+    Dim tbl As ListObject
 
     ' Define o workbook atual
     Set wbAtual = ThisWorkbook
@@ -80,6 +81,24 @@ Sub CriarNovaAbaEImportarDados()
         End If
     Next j
 
-    MsgBox "Busca concluída!", vbInformation
-End Sub
+    ' Formatar o conteúdo como tabela
+    Set tbl = wsNova.ListObjects.Add(xlSrcRange, wsNova.UsedRange, , xlYes)
+    tbl.Name = "TabelaHistoricoOS"
+    tbl.TableStyle = "TableStyleMedium9"
 
+    ' Excluir colunas P, Q, R, S
+    wsNova.Range("P:S").Delete
+
+ Set ws = ThisWorkbook.Sheets("Histórico de OS Maximo") ' Defina o nome da aba onde a coluna está localizada
+
+    ' Deleta o conteúdo da coluna "O"
+    ws.Columns("O").ClearContents
+
+    ' Renomeia o título da coluna "O" para "Observação 2"
+    ws.Cells(1, 15).Value = "Observação" ' Linha 1, Coluna 15 (Coluna "O")
+
+' Definir largura das colunas
+    wsNova.Columns.ColumnWidth = 10.0
+
+    MsgBox "Busca concluída e tabela formatada!", vbInformation
+End Sub
