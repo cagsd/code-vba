@@ -84,7 +84,7 @@ Sub CriarNovaAbaEImportarDados()
     ' Formatar o conteúdo como tabela
     Set tbl = wsNova.ListObjects.Add(xlSrcRange, wsNova.UsedRange, , xlYes)
     tbl.Name = "TabelaHistoricoOS"
-    tbl.TableStyle = "TableStyleMedium9"
+   tbl.TableStyle = "TableStyleLight1"
 
     ' Excluir colunas P, Q, R, S
     wsNova.Range("P:S").Delete
