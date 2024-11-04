@@ -1,0 +1,28 @@
+Sub CriarAba()
+    Dim nomeAba As String
+    Dim novaAba As Worksheet
+    
+    ' Pergunta ao usuário qual nome deseja para a nova aba
+    nomeAba = InputBox("Digite o nome da nova aba:", "Criar Nova Aba")
+    
+    ' Verifica se o usuário não cancelou
+    If nomeAba <> "" Then
+        ' Tenta criar a nova aba
+        On Error Resume Next ' Ignora erros, como nome já existente
+        Set novaAba = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
+        
+        ' Define o nome da nova aba
+        novaAba.Name = nomeAba
+        
+        ' Verifica se houve erro ao nomear a aba
+        If Err.Number <> 0 Then
+            MsgBox "Erro ao criar a aba. O nome pode já existir ou não é válido.", vbExclamation
+            Err.Clear
+        Else
+            MsgBox "Aba '" & nomeAba & "' criada com sucesso!", vbInformation
+        End If
+        On Error GoTo 0 ' Volta ao tratamento padrão de erros
+    Else
+        MsgBox "Operação cancelada.", vbInformation
+    End If
+End Sub
