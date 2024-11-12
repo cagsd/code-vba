@@ -1,0 +1,51 @@
+Sub BuscarValorNasAbas()
+
+    Dim wsMax As Worksheet
+    Dim ws As Worksheet
+    Dim ultimaLinhaMax As Long
+    Dim ultimaColuna As Long
+    Dim valorProcurado As Variant
+    Dim linhaResultado As Variant
+    Dim i As Long, j As Long
+    
+    ' Definir a aba "max"
+    Set wsMax = ThisWorkbook.Sheets("max")
+    
+    ' Adicionar título na célula da coluna D (Data) e E (Supervisor-Area)
+    wsMax.Cells(1, "D").Value = "Data"
+    wsMax.Cells(1, "E").Value = "Supervisor-Area"
+    
+    ' Encontrar a última linha da coluna B da aba "max"
+    ultimaLinhaMax = wsMax.Cells(wsMax.Rows.Count, "B").End(xlUp).Row
+    
+    ' Encontrar a última aba do workbook
+    ultimaColuna = ThisWorkbook.Sheets.Count
+    
+    ' Laço para percorrer as células da coluna B da aba "max"
+    For i = 2 To ultimaLinhaMax ' Começa em 2 assumindo que a linha 1 tem cabeçalho
+        valorProcurado = wsMax.Cells(i, "B").Value
+        
+        ' Laço para percorrer as abas à direita da aba "max"
+        For j = 2 To ultimaColuna
+            Set ws = ThisWorkbook.Sheets(j) ' Definir a aba à direita
+            
+            ' Tentar encontrar o valor na coluna F da aba atual
+            On Error Resume Next
+            linhaResultado = Application.Match(valorProcurado, ws.Range("F:F"), 0)
+            On Error GoTo 0
+            
+            ' Se o valor for encontrado, linhaResultado não será erro
+            If Not IsError(linhaResultado) Then
+                ' A linha da aba ws é a linhaResultado, mas ela é relativa à coluna F
+                ' Agora, precisamos acessar a mesma linha na coluna D da aba ws
+                wsMax.Cells(i, "D").Value = ws.Cells(linhaResultado, "D").Value
+                ' Adicionar o nome da aba onde o valor foi encontrado na coluna E
+                wsMax.Cells(i, "E").Value = ws.Name
+                Exit For ' Para procurar apenas na primeira aba onde encontrar
+            End If
+        Next j
+    Next i
+
+    MsgBox "Busca concluída!"
+
+End Sub
