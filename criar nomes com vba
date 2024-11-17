@@ -5,14 +5,13 @@ Sub GerarNomesFakes()
     Dim nomeCompleto As String
 
     ' Defina listas de nomes e sobrenomes
-    nomes = Array("Ana", "Carlos", "Pedro", "Maria", "Lucas", "Juliana", "Roberta", "João", "Lucas", "Maria", "Gabriel", "Fernanda", "Marcos", "Sofia", "Helena", "Daniel", "Camila")
-    sobrenomes = Array("Silva", "Oliveira", "Pereira", "Costa", "Almeida", "Santos", "Souza", "Martins", "Ferreira", "Carvalho")
+    nomes = Array("Ana", "Carlos", "Pedro", "Maria", "Lucas", "Juliana", "Roberta", "João", "Lucas", "Maria", "Gabriel","Thiago", "Fernanda", "Marcos", "Sofia", "Helena", "Daniel", "Camila")
+    sobrenomes = Array("Silva", "Oliveira", "Pereira", "Costa", "Almeida", "Santos", "Souza", "Martins", "Ferreira", "Carvalho","Barros", "Lima", "Ribeiro")
 
     ' Limpar células existentes na planilha
-    Range("A1:A150").ClearContents
+    Range("A1:A200").ClearContents
 
-    ' Gerar 150 nomes fictícios
-    For i = 1 To 150
+   For i = 1 To 200
         nomeCompleto = nomes(Int(Rnd * UBound(nomes))) & " " & sobrenomes(Int(Rnd * UBound(sobrenomes)))
         Cells(i, 1).Value = nomeCompleto
     Next i
